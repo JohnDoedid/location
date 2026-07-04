@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Location Tool</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            display: flex;
+            min-height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            color: #111;
+            transition: background-color 0.3s, color 0.3s, filter 0.3s;
+        }
+        .left {
+            width: 50vw;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
+            gap: 20px;
+            border-right: 1px solid #ccc;
+        }
+        #display {
+            font-size: 1.2rem;
+            font-weight: bold;
+            max-width: 90%;
+            line-height: 1.5;
+        }
+        #map-frame {
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            max-width: 90%;
+            width: 100%;
+            height: 350px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            display: none;
+        }
+        .right {
+            width: 50vw;
+            height: 100vh;
+            padding: 20px 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-family: Arial, sans-serif;
+            font-size: 0.75rem;
+            line-height: 1.3;
+            background-color: #f5f5f5;
+            border-left: 1px solid #ccc;
+        }
+        .right p {
+            margin: 0;
+            padding: 2px 0;
+            border-bottom: 1px dashed #ddd;
+            word-break: break-all;
+        }
+        .right p:last-child {
+            border-bottom: none;
+        }
+        .right .label {
+            font-weight: bold;
+            display: inline-block;
+            min-width: 150px;
+        }
+        body.dark-mode {
+            background-color: #1a1a1a;
+            color: #eee;
+        }
+        body.dark-mode .left {
+            background-color: #1a1a1a;
+        }
+        body.dark-mode .right {
+            background-color: #222;
+            border-left-color: #444;
+        }
+        body.dark-mode .right p {
+            border-bottom-color: #444;
+        }
+        body.dark-mode #display {
+            color: #eee;
+        }
+        body.dark-mode #map-frame {
+            border-color: #555;
+        }
+        body.dark-mode .left {
+            border-right-color: #444;
+        }
+        body.dim-mode {
+            filter: sepia(0.3) saturate(0.8) brightness(0.9) hue-rotate(-10deg);
+        }
+        body.dim-mode #mode-btn {
+            filter: sepia(0) saturate(1) brightness(1) hue-rotate(0);
+        }
+        #consent-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+            backdrop-filter: blur(5px);
+        }
+        .modal-box {
+            background: black;
+            padding: 30px 35px;
+            border: 5px ridge #999;
+            max-width: 50%;
+            width: 90%;
+            text-align: center;
+            animation: fadeUp 0.3s ease-in;
+            color: white;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(50vh); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-box h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        .modal-box p {
+            margin: 10px 0 20px;
+            font-size: 1rem;
+        }
+        .grey-deed {
+            background: #000;
+            color: #fff;
+            padding: 16px 20px;
+            border: 3px ridge #888;
+            margin: 20px 0 25px;
+            font-size: 0.95rem;
+            text-align: left;
+            line-height: 1.5;
+        }
+        .grey-deed strong {
+            color: #fff;
+        }
+        #proceed-btn {
+            background: #333;
+            color: #fff;
+            border: 3px groove #666;
+            padding: 13px 40px;
+            border-radius: 50px;
+            font-size: 1.15rem;
+            font-weight: bold;
+            cursor: not-allowed;
+            transition: background 0.2s;
+        }
+        #proceed-btn:hover {
+            background: #555;
+        }
+        #mode-btn {
+            position: fixed;
+            bottom: 1vh;
+            right: 1vw;
+            z-index: 9999;
+            background: #333;
+            color: #fff;
+            border: 2px ridge #666;
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            user-select: none;
+            font-family: Arial, sans-serif;
+            transition: background 0.2s, border-color 0.2s;
+            min-width: 100px;
+        }
+        #mode-btn:hover {
+            background: #444;
+            border-color: #888;
+        }
+        #mode-btn.seizure-mode {
+            background: #800;
+            border-color: #f00;
+            color: #fff;
+            animation: flash 0.3s infinite alternate;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        @keyframes flash {
+            from { background: #800; }
+            to { background: #f00; }
+        }
+        #download-btn {
+            position: fixed;
+            bottom: 1vh;
+            left: 1vw;
+            z-index: 9999;
+            background: #333;
+            color: #fff;
+            border: 2px ridge #666;
+            padding: 8px 16px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-family: Arial, sans-serif;
+            transition: background 0.2s;
+        }
+        #download-btn:hover {
+            background: #444;
+        }
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            .left, .right { width: 100vw; min-height: auto; }
+            .left { border-right: none; border-bottom: 1px solid #ccc; }
+            .right { height: 50vh; border-left: none; }
+            .modal-box { max-width: 92%; padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="consent-modal">
+        <div class="modal-box">
+            <h2>Location Warn</h2>
+            <p>This tool will detect your browser, approximate address, and show an interactive map. <br> It will also show other miscellaneous data accesible via js</p>
+            <div class="grey-deed">
+                <strong>Acknowledgement:</strong><br />
+                By proceeding, you acknowledge that <strong>the creator is very not responsible</strong> for any decisions, actions, or consequences made based on this location data. You assume full responsibility for your own choices. If you <b>do</b> proceed, you agree to show your information on your screen, and anyone else watching it.
+                <br /><strong>Disclaimer:</strong><br />
+                As read, this detects and shows your precise location, relative location, and a lot of other accesible information. Please proceed with caution before proceedng to click the proceed button.<br><p style='color:#999;'>the borders look 3d, isn't that cool?</p>
+            </div>
+            <div><button id="proceed-btn">Proceed</button></div>
+        </div>
+    </div>
+
+    <div class="left">
+        <div id="display">Press "Proceed" to detect your location… dih</div>
+        <iframe id="map-frame" title="OpenStreetMap location" src=""></iframe>
+    </div>
+
+    <div class="right" id="info-right"></div>
+
+    <button id="mode-btn">toggle</button>
+    <button id="download-btn">Download JSON</button>
+
+    <script>
+        (function() {
+            const right = document.getElementById('info-right');
+            const display = document.getElementById('display');
+            const mapFrame = document.getElementById('map-frame');
+            const modal = document.getElementById('consent-modal');
+            const proceedBtn = document.getElementById('proceed-btn');
+            const modeBtn = document.getElementById('mode-btn');
+            const downloadBtn = document.getElementById('download-btn');
+
+            let currentInfo = {};
+            let locationData = { lat: null, lon: null, precise: null };
+            let ipAddress = 'unknown';
+
+            function getBrowserName() {
+                const ua = navigator.userAgent;
+                if (ua.includes("Firefox")) return "Firefox";
+                if (ua.includes("SamsungBrowser")) return "Samsung Internet";
+                if (ua.includes("Opera") || ua.includes("OPR")) return "Opera";
+                if (ua.includes("Trident")) return "Internet Explorer";
+                if (ua.includes("Edge") || ua.includes("Edg")) return "Edge";
+                if (ua.includes("Chrome")) return "Chrome";
+                if (ua.includes("Safari")) return "Safari";
+                return "device";
+            }
+
+            async function fetchReverseGeocode(lat, lon) {
+                try {
+                    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=9&addressdetails=1`;
+                    const resp = await fetch(url, { headers: { 'User-Agent': 'LocationTool/1.0' } });
+                    if (!resp.ok) throw new Error();
+                    const data = await resp.json();
+                    const addr = data.address || {};
+                    const relative = addr.neighbourhood || addr.suburb || addr.village || addr.quarter || addr.city_district || "this neighborhood";
+                    const city = addr.city || addr.town || addr.municipality || "";
+                    const country = addr.country || "";
+                    const precise = [city, country].filter(Boolean).join(", ") || `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
+                    return { relative, precise };
+                } catch (_) {
+                    return { relative: "this area", precise: `Coordinates: ${lat.toFixed(4)}, ${lon.toFixed(4)}` };
+                }
+            }
+
+            function buildOsmEmbedUrl(lat, lon) {
+                const delta = 0.02;
+                return `https://www.openstreetmap.org/export/embed.html?bbox=${lon - delta},${lat - delta},${lon + delta},${lat + delta}&layer=mapnik&marker=${lat},${lon}`;
+            }
+
+            function buildStaticMapUrl(lat, lon) {
+                return `https://staticmap.openstreetmap.de/staticmap.php?center=${lat},${lon}&zoom=15&size=500x350&maptype=mapnik&markers=${lat},${lon},ol-marker`;
+            }
+
+            async function getIP() {
+                try {
+                    const resp = await fetch('https://api.ipify.org?format=json');
+                    if (!resp.ok) throw new Error();
+                    const data = await resp.json();
+                    return data.ip;
+                } catch { return 'unknown'; }
+            }
+
+            function getMapImageBase64(lat, lon) {
+                return new Promise((resolve) => {
+                    const img = new Image();
+                    img.crossOrigin = 'anonymous';
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        try {
+                            resolve(canvas.toDataURL('image/jpeg'));
+                        } catch (e) {
+                            resolve(null);
+                        }
+                    };
+                    img.onerror = function() {
+                        resolve(null);
+                    };
+                    img.src = buildStaticMapUrl(lat, lon);
+                });
+            }
+
+            async function gatherAllInfo(lat, lon, geoPrecise, ip) {
+                const now = new Date();
+                const info = {
+                    'Browser Name': getBrowserName(),
+                    'IP Address': ip || 'unknown',
+                    'User Agent': navigator.userAgent,
+                    'Platform': navigator.platform,
+                    'App Name': navigator.appName,
+                    'App Version': navigator.appVersion,
+                    'Vendor': navigator.vendor,
+                    'Language': navigator.language,
+                    'Languages': navigator.languages.join(', '),
+                    'Cookie Enabled': navigator.cookieEnabled,
+                    'Online': navigator.onLine,
+                    'Do Not Track': navigator.doNotTrack || 'unspecified',
+                    'Hardware Concurrency': navigator.hardwareConcurrency || 'unknown',
+                    'Device Memory': navigator.deviceMemory || 'unknown',
+                    'Max Touch Points': navigator.maxTouchPoints || 'unknown',
+                    'Screen Width': screen.width,
+                    'Screen Height': screen.height,
+                    'Screen AvailWidth': screen.availWidth,
+                    'Screen AvailHeight': screen.availHeight,
+                    'Screen Color Depth': screen.colorDepth,
+                    'Screen Pixel Depth': screen.pixelDepth,
+                    'Device Pixel Ratio': window.devicePixelRatio,
+                    'Inner Width': window.innerWidth,
+                    'Inner Height': window.innerHeight,
+                    'Outer Width': window.outerWidth,
+                    'Outer Height': window.outerHeight,
+                    'Page X Offset': window.pageXOffset,
+                    'Page Y Offset': window.pageYOffset,
+                    'Scroll Width': document.documentElement.scrollWidth,
+                    'Scroll Height': document.documentElement.scrollHeight,
+                    'Client Width': document.documentElement.clientWidth,
+                    'Client Height': document.documentElement.clientHeight,
+                    'URL': location.href,
+                    'Protocol': location.protocol,
+                    'Hostname': location.hostname,
+                    'Port': location.port,
+                    'Pathname': location.pathname,
+                    'Search': location.search,
+                    'Hash': location.hash,
+                    'Origin': location.origin,
+                    'Referrer': document.referrer || 'none',
+                    'Document Title': document.title,
+                    'Last Modified': document.lastModified,
+                    'Character Set': document.characterSet,
+                    'Visibility State': document.visibilityState,
+                    'Local Storage Items': localStorage.length,
+                    'Session Storage Items': sessionStorage.length,
+                    'Cookies': document.cookie || 'none',
+                    'Connection Type': navigator.connection?.effectiveType || 'unknown',
+                    'Connection Downlink': navigator.connection?.downlink || 'unknown',
+                    'Connection RTT': navigator.connection?.rtt || 'unknown',
+                    'Connection SaveData': navigator.connection?.saveData || 'unknown',
+                    'Performance Memory': performance.memory ? JSON.stringify(performance.memory) : 'unsupported',
+                    'Performance Timing': performance.timing ? 'available' : 'unsupported',
+                    'Clipboard Supported': !!navigator.clipboard,
+                    'Bluetooth Supported': !!navigator.bluetooth,
+                    'USB Supported': !!navigator.usb,
+                    'Serial Supported': !!navigator.serial,
+                    'HID Supported': !!navigator.hid,
+                    'NFC Supported': !!navigator.nfc,
+                    'Wake Lock Supported': !!navigator.wakeLock,
+                    'Share Supported': !!navigator.share,
+                    'Vibration Supported': !!navigator.vibrate,
+                    'Media Devices Supported': !!navigator.mediaDevices,
+                    'Service Worker Supported': 'serviceWorker' in navigator,
+                    'WebGL Supported': !!document.createElement('canvas').getContext('webgl'),
+                    'Notification Permission': ('Notification' in window) ? Notification.permission : 'unsupported',
+                    'Permissions API Supported': !!navigator.permissions,
+                    'Current Date': now.toString(),
+                    'ISO String': now.toISOString(),
+                    'Unix Timestamp (ms)': Date.now(),
+                    'Unix Timestamp (s)': Math.floor(Date.now() / 1000),
+                    'Year': now.getFullYear(),
+                    'Month': now.getMonth() + 1,
+                    'Month Name': now.toLocaleString('default', { month: 'long' }),
+                    'Day': now.getDate(),
+                    'Day of Week': now.getDay(),
+                    'Day Name': now.toLocaleString('default', { weekday: 'long' }),
+                    'Hours': now.getHours(),
+                    'Minutes': now.getMinutes(),
+                    'Seconds': now.getSeconds(),
+                    'Milliseconds': now.getMilliseconds(),
+                    'Timezone': Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    'Timezone Offset (min)': now.getTimezoneOffset(),
+                    'Latitude': lat !== null ? lat : 'not obtained',
+                    'Longitude': lon !== null ? lon : 'not obtained',
+                    'Registered Location': geoPrecise || 'unknown',
+                };
+                return info;
+            }
+
+            function renderInfo(info) {
+                right.innerHTML = '';
+                const header = document.createElement('p');
+                header.style.fontWeight = 'bold';
+                header.style.fontSize = '0.9rem';
+                header.style.borderBottom = '2px solid #999';
+                header.style.paddingBottom = '8px';
+                header.textContent = 'All accessible information is listed below ().';
+                right.appendChild(header);
+                for (const [key, val] of Object.entries(info)) {
+                    const p = document.createElement('p');
+                    const span = document.createElement('span');
+                    span.className = 'label';
+                    span.textContent = key + ':';
+                    p.appendChild(span);
+                    p.appendChild(document.createTextNode(' ' + String(val)));
+                    right.appendChild(p);
+                }
+            }
+
+            let clickCount = 0;
+            let clickWindow = null;
+            let longPressTimer = null;
+            let isLongPress = false;
+
+            modeBtn.addEventListener('click', function(e) {
+                if (this.classList.contains('seizure-mode')) return;
+                if (isLongPress) { isLongPress = false; return; }
+                document.body.classList.toggle('dark-mode');
+                if (document.body.classList.contains('dim-mode')) {
+                    document.body.classList.remove('dim-mode');
+                }
+            });
+
+            modeBtn.addEventListener('mousedown', function(e) {
+                if (this.classList.contains('seizure-mode')) return;
+                isLongPress = false;
+                longPressTimer = setTimeout(() => {
+                    isLongPress = true;
+                    document.body.classList.toggle('dim-mode');
+                    if (document.body.classList.contains('dark-mode')) {
+                        document.body.classList.remove('dark-mode');
+                    }
+                }, 600);
+            });
+            modeBtn.addEventListener('mouseup', function() { clearTimeout(longPressTimer); });
+            modeBtn.addEventListener('mouseleave', function() { clearTimeout(longPressTimer); });
+            modeBtn.addEventListener('touchstart', function(e) {
+                if (this.classList.contains('seizure-mode')) return;
+                isLongPress = false;
+                longPressTimer = setTimeout(() => {
+                    isLongPress = true;
+                    document.body.classList.toggle('dim-mode');
+                    if (document.body.classList.contains('dark-mode')) {
+                        document.body.classList.remove('dark-mode');
+                    }
+                }, 600);
+            });
+            modeBtn.addEventListener('touchend', function() { clearTimeout(longPressTimer); });
+            modeBtn.addEventListener('touchcancel', function() { clearTimeout(longPressTimer); });
+
+            modeBtn.addEventListener('click', function(e) {
+                if (this.classList.contains('seizure-mode')) return;
+                if (!clickWindow) {
+                    clickWindow = setTimeout(() => { clickCount = 0; clickWindow = null; }, 1000);
+                }
+                clickCount++;
+                if (clickCount >= 5) {
+                    this.classList.add('seizure-mode');
+                    this.textContent = 'seizure triggered';
+                    document.body.classList.remove('dark-mode', 'dim-mode');
+                    clearTimeout(longPressTimer);
+                    clearTimeout(clickWindow);
+                    clickWindow = null;
+                    alert('Seizure detected! Button disabled.');
+                }
+            });
+
+            async function startLocationProcess() {
+                const browser = getBrowserName();
+                ipAddress = await getIP();
+                if (!navigator.geolocation) {
+                    display.innerText = `I am a ${browser} user, but geolocation is not supported by this browser. dih`;
+                    const info = await gatherAllInfo(null, null, null, ipAddress);
+                    currentInfo = info;
+                    renderInfo(info);
+                    return;
+                }
+                display.innerText = "Resolving address names…";
+                navigator.geolocation.getCurrentPosition(
+                    async (pos) => {
+                        const lat = pos.coords.latitude;
+                        const lon = pos.coords.longitude;
+                        const geo = await fetchReverseGeocode(lat, lon);
+                        locationData = { lat, lon, precise: geo.precise };
+                        display.innerText =
+                            `I am a ${browser} user and I am in ${geo.relative}, which is in ${geo.precise} (${lat.toFixed(4)}°, ${lon.toFixed(4)}°)! dih`;
+                        mapFrame.src = buildOsmEmbedUrl(lat, lon);
+                        mapFrame.style.display = 'block';
+                        const info = await gatherAllInfo(lat, lon, geo.precise, ipAddress);
+                        currentInfo = info;
+                        renderInfo(info);
+                    },
+                    async (err) => {
+                        display.innerText = `I am a ${browser} user, but location access was denied or unavailable. dih`;
+                        const info = await gatherAllInfo(null, null, null, ipAddress);
+                        currentInfo = info;
+                        renderInfo(info);
+                        console.warn(err.message);
+                    },
+                    { enableHighAccuracy: true, timeout: 100000 }
+                );
+            }
+
+            proceedBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+                startLocationProcess();
+            });
+
+            (async function init() {
+                ipAddress = await getIP();
+                const info = await gatherAllInfo(null, null, null, ipAddress);
+                currentInfo = info;
+                renderInfo(info);
+                if ('getBattery' in navigator) {
+                    navigator.getBattery().then(battery => {
+                        const p = document.createElement('p');
+                        const span = document.createElement('span');
+                        span.className = 'label';
+                        span.textContent = 'Battery Level:';
+                        p.appendChild(span);
+                        p.appendChild(document.createTextNode(' ' + (battery.level * 100) + '% (charging: ' + battery.charging + ')'));
+                        right.appendChild(p);
+                        currentInfo['Battery Level'] = (battery.level * 100) + '% (charging: ' + battery.charging + ')';
+                    });
+                }
+                if (navigator.connection) {
+                    const updateConn = () => {
+                        const p = document.createElement('p');
+                        const span = document.createElement('span');
+                        span.className = 'label';
+                        span.textContent = 'Connection (live):';
+                        p.appendChild(span);
+                        p.appendChild(document.createTextNode(' type=' + navigator.connection.effectiveType +
+                            ', downlink=' + navigator.connection.downlink +
+                            ', rtt=' + navigator.connection.rtt));
+                        right.appendChild(p);
+                        currentInfo['Connection (live)'] = 'type=' + navigator.connection.effectiveType +
+                            ', downlink=' + navigator.connection.downlink +
+                            ', rtt=' + navigator.connection.rtt;
+                    };
+                    updateConn();
+                    navigator.connection.addEventListener('change', updateConn);
+                }
+            })();
+
+            downloadBtn.addEventListener('click', async function() {
+                const data = { ...currentInfo };
+                if (locationData.lat !== null) {
+                    data['Latitude (raw)'] = locationData.lat;
+                    data['Longitude (raw)'] = locationData.lon;
+                    data['Registered Location'] = locationData.precise;
+                }
+                let mapImageBase64 = null;
+                if (locationData.lat !== null && locationData.lon !== null) {
+                    mapImageBase64 = await getMapImageBase64(locationData.lat, locationData.lon);
+                }
+                data['Map Image (base64)'] = mapImageBase64 || 'could not generate';
+                const json = JSON.stringify(data, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'location_data.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            });
+        })();
+    </script>
+</body>
+</html>
