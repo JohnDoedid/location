@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,6 +11,7 @@
             margin: 0;
             padding: 0;
         }
+
         body {
             display: flex;
             min-height: 100vh;
@@ -19,6 +21,7 @@
             color: #111;
             transition: background-color 0.3s, color 0.3s, filter 0.3s;
         }
+
         .left {
             width: 50vw;
             min-height: 100vh;
@@ -31,21 +34,24 @@
             gap: 20px;
             border-right: 1px solid #ccc;
         }
+
         #display {
             font-size: 1.2rem;
             font-weight: bold;
             max-width: 90%;
             line-height: 1.5;
         }
+
         #map-frame {
             border: 2px solid #ccc;
             border-radius: 8px;
             max-width: 90%;
             width: 100%;
             height: 350px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             display: none;
         }
+
         .right {
             width: 50vw;
             height: 100vh;
@@ -60,62 +66,103 @@
             background-color: #f5f5f5;
             border-left: 1px solid #ccc;
         }
+
         .right p {
             margin: 0;
             padding: 2px 0;
             border-bottom: 1px dashed #ddd;
             word-break: break-all;
         }
+
         .right p:last-child {
             border-bottom: none;
         }
+
         .right .label {
             font-weight: bold;
             display: inline-block;
             min-width: 150px;
         }
+
         body.dark-mode {
             background-color: #1a1a1a;
             color: #eee;
         }
+
         body.dark-mode .left {
             background-color: #1a1a1a;
         }
+
         body.dark-mode .right {
             background-color: #222;
             border-left-color: #444;
         }
+
         body.dark-mode .right p {
             border-bottom-color: #444;
         }
+
         body.dark-mode #display {
             color: #eee;
         }
+
         body.dark-mode #map-frame {
             border-color: #555;
         }
+
         body.dark-mode .left {
             border-right-color: #444;
         }
+
         body.dim-mode {
-            filter: sepia(0.3) saturate(0.8) brightness(0.9) hue-rotate(-10deg);
+            background-color: #2b2a26;
+            color: #e6e2ce;
         }
+
+        body.dim-mode .left {
+            background-color: #2b2a26;
+            border-right-color: #525048;
+        }
+
+        body.dim-mode .right {
+            background-color: #33322d;
+            border-left-color: #525048;
+        }
+
+        body.dim-mode .right p {
+            border-bottom-color: #4a4840;
+        }
+
+        body.dim-mode #display {
+            color: #e6e2ce;
+        }
+
+        body.dim-mode #map-frame {
+            border-color: #666358;
+        }
+
+        body.dim-mode {
+            filter: sepia(0.9) saturate(0.8) brightness(0.9) hue-rotate(-10deg);
+        }
+
         body.dim-mode #mode-btn {
             filter: sepia(0) saturate(1) brightness(1) hue-rotate(0);
         }
+
         #consent-modal {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0, 0, 0, 0.7);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 999;
             backdrop-filter: blur(5px);
         }
+
         .modal-box {
             background: black;
             padding: 30px 35px;
@@ -126,18 +173,29 @@
             animation: fadeUp 0.3s ease-in;
             color: white;
         }
+
         @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(50vh); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(50vh);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
+
         .modal-box h2 {
             font-size: 1.8rem;
             margin-bottom: 10px;
         }
+
         .modal-box p {
             margin: 10px 0 20px;
             font-size: 1rem;
         }
+
         .grey-deed {
             background: #000;
             color: #fff;
@@ -148,9 +206,11 @@
             text-align: left;
             line-height: 1.5;
         }
+
         .grey-deed strong {
             color: #fff;
         }
+
         #proceed-btn {
             background: #333;
             color: #fff;
@@ -162,9 +222,11 @@
             cursor: not-allowed;
             transition: background 0.2s;
         }
+
         #proceed-btn:hover {
             background: #555;
         }
+
         #mode-btn {
             position: fixed;
             bottom: 1vh;
@@ -181,10 +243,12 @@
             transition: background 0.2s, border-color 0.2s;
             min-width: 100px;
         }
+
         #mode-btn:hover {
             background: #444;
             border-color: #888;
         }
+
         #mode-btn.seizure-mode {
             background: #800;
             border-color: #f00;
@@ -193,10 +257,17 @@
             cursor: not-allowed;
             pointer-events: none;
         }
+
         @keyframes flash {
-            from { background: #800; }
-            to { background: #f00; }
+            from {
+                background: #800;
+            }
+
+            to {
+                background: #f00;
+            }
         }
+
         #download-btn {
             position: fixed;
             bottom: 1vh;
@@ -211,18 +282,61 @@
             font-family: Arial, sans-serif;
             transition: background 0.2s;
         }
+
         #download-btn:hover {
             background: #444;
         }
+
         @media (max-width: 768px) {
-            body { flex-direction: column; }
-            .left, .right { width: 100vw; min-height: auto; }
-            .left { border-right: none; border-bottom: 1px solid #ccc; }
-            .right { height: 50vh; border-left: none; }
-            .modal-box { max-width: 92%; padding: 20px; }
+            body {
+                flex-direction: column;
+            }
+
+            .left,
+            .right {
+                width: 100vw;
+                min-height: auto;
+            }
+
+            .left {
+                border-right: none;
+                border-bottom: 1px solid #ccc;
+            }
+
+            .right {
+                height: 50vh;
+                border-left: none;
+            }
+
+            .modal-box {
+                max-width: 92%;
+                padding: 20px;
+            }
+        }
+
+        #update-loc-btn {
+            background: #333;
+            color: #fff;
+            border: 5px ridge #676;
+            padding: 8px 16px;
+            font-size: 0.9rem;
+            cursor: alias;
+            transition: background 0.2s;
+            display: none;
+            margin-top: 10px;
+            font-weight: oblique;
+        }
+
+        #update-loc-btn:hover {
+            background: #555;
+        }
+
+        body.dark-mode #update-loc-btn {
+            border-color: #555;
         }
     </style>
 </head>
+
 <body>
     <div id="consent-modal">
         <div class="modal-box">
@@ -232,7 +346,8 @@
                 <strong>Acknowledgement:</strong><br />
                 By proceeding, you acknowledge that <strong>the creator is very not responsible</strong> for any decisions, actions, or consequences made based on this location data. You assume full responsibility for your own choices. If you <b>do</b> proceed, you agree to show your information on your screen, and anyone else watching it.
                 <br /><strong>Disclaimer:</strong><br />
-                As read, this detects and shows your precise location, relative location, and a lot of other accesible information. Please proceed with caution before proceedng to click the proceed button.<br><p style='color:#999;'>the borders look 3d, isn't that cool?</p>
+                As read, this detects and shows your precise location, relative location, and a lot of other accesible information. Please proceed with caution before proceedng to click the proceed button.<br>
+                <p style='color:#999;'>the borders look 3d, isn't that cool?</p>
             </div>
             <div><button id="proceed-btn">Proceed</button></div>
         </div>
@@ -241,6 +356,7 @@
     <div class="left">
         <div id="display">Press "Proceed" to detect your location… dih</div>
         <iframe id="map-frame" title="OpenStreetMap location" src=""></iframe>
+        <button id="update-loc-btn">Update Location</button>
     </div>
 
     <div class="right" id="info-right"></div>
@@ -257,9 +373,26 @@
             const proceedBtn = document.getElementById('proceed-btn');
             const modeBtn = document.getElementById('mode-btn');
             const downloadBtn = document.getElementById('download-btn');
+            const updateLocBtn = document.getElementById('update-loc-btn');
+
+
+            updateLocBtn.addEventListener('click', () => {
+                display.innerText = "Refreshing data…";
+                startLocationProcess();
+            });
+
+            proceedBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+                updateLocBtn.style.display = 'inline-block';
+                startLocationProcess();
+            });
 
             let currentInfo = {};
-            let locationData = { lat: null, lon: null, precise: null };
+            let locationData = {
+                lat: null,
+                lon: null,
+                precise: null
+            };
             let ipAddress = 'unknown';
 
             function getBrowserName() {
@@ -277,7 +410,11 @@
             async function fetchReverseGeocode(lat, lon) {
                 try {
                     const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=9&addressdetails=1`;
-                    const resp = await fetch(url, { headers: { 'User-Agent': 'LocationTool/1.0' } });
+                    const resp = await fetch(url, {
+                        headers: {
+                            'User-Agent': 'LocationTool/1.0'
+                        }
+                    });
                     if (!resp.ok) throw new Error();
                     const data = await resp.json();
                     const addr = data.address || {};
@@ -285,9 +422,15 @@
                     const city = addr.city || addr.town || addr.municipality || "";
                     const country = addr.country || "";
                     const precise = [city, country].filter(Boolean).join(", ") || `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
-                    return { relative, precise };
+                    return {
+                        relative,
+                        precise
+                    };
                 } catch (_) {
-                    return { relative: "this area", precise: `Coordinates: ${lat.toFixed(4)}, ${lon.toFixed(4)}` };
+                    return {
+                        relative: "this area",
+                        precise: `Coordinates: ${lat.toFixed(4)}, ${lon.toFixed(4)}`
+                    };
                 }
             }
 
@@ -306,7 +449,9 @@
                     if (!resp.ok) throw new Error();
                     const data = await resp.json();
                     return data.ip;
-                } catch { return 'unknown'; }
+                } catch {
+                    return 'unknown';
+                }
             }
 
             function getMapImageBase64(lat, lon) {
@@ -409,10 +554,14 @@
                     'Unix Timestamp (s)': Math.floor(Date.now() / 1000),
                     'Year': now.getFullYear(),
                     'Month': now.getMonth() + 1,
-                    'Month Name': now.toLocaleString('default', { month: 'long' }),
+                    'Month Name': now.toLocaleString('default', {
+                        month: 'long'
+                    }),
                     'Day': now.getDate(),
                     'Day of Week': now.getDay(),
-                    'Day Name': now.toLocaleString('default', { weekday: 'long' }),
+                    'Day Name': now.toLocaleString('default', {
+                        weekday: 'long'
+                    }),
                     'Hours': now.getHours(),
                     'Minutes': now.getMinutes(),
                     'Seconds': now.getSeconds(),
@@ -453,7 +602,10 @@
 
             modeBtn.addEventListener('click', function(e) {
                 if (this.classList.contains('seizure-mode')) return;
-                if (isLongPress) { isLongPress = false; return; }
+                if (isLongPress) {
+                    isLongPress = false;
+                    return;
+                }
                 document.body.classList.toggle('dark-mode');
                 if (document.body.classList.contains('dim-mode')) {
                     document.body.classList.remove('dim-mode');
@@ -471,8 +623,12 @@
                     }
                 }, 600);
             });
-            modeBtn.addEventListener('mouseup', function() { clearTimeout(longPressTimer); });
-            modeBtn.addEventListener('mouseleave', function() { clearTimeout(longPressTimer); });
+            modeBtn.addEventListener('mouseup', function() {
+                clearTimeout(longPressTimer);
+            });
+            modeBtn.addEventListener('mouseleave', function() {
+                clearTimeout(longPressTimer);
+            });
             modeBtn.addEventListener('touchstart', function(e) {
                 if (this.classList.contains('seizure-mode')) return;
                 isLongPress = false;
@@ -484,13 +640,20 @@
                     }
                 }, 600);
             });
-            modeBtn.addEventListener('touchend', function() { clearTimeout(longPressTimer); });
-            modeBtn.addEventListener('touchcancel', function() { clearTimeout(longPressTimer); });
+            modeBtn.addEventListener('touchend', function() {
+                clearTimeout(longPressTimer);
+            });
+            modeBtn.addEventListener('touchcancel', function() {
+                clearTimeout(longPressTimer);
+            });
 
             modeBtn.addEventListener('click', function(e) {
                 if (this.classList.contains('seizure-mode')) return;
                 if (!clickWindow) {
-                    clickWindow = setTimeout(() => { clickCount = 0; clickWindow = null; }, 1000);
+                    clickWindow = setTimeout(() => {
+                        clickCount = 0;
+                        clickWindow = null;
+                    }, 1000);
                 }
                 clickCount++;
                 if (clickCount >= 5) {
@@ -517,26 +680,32 @@
                 display.innerText = "Resolving address names…";
                 navigator.geolocation.getCurrentPosition(
                     async (pos) => {
-                        const lat = pos.coords.latitude;
-                        const lon = pos.coords.longitude;
-                        const geo = await fetchReverseGeocode(lat, lon);
-                        locationData = { lat, lon, precise: geo.precise };
-                        display.innerText =
-                            `I am a ${browser} user and I am in ${geo.relative}, which is in ${geo.precise} (${lat.toFixed(4)}°, ${lon.toFixed(4)}°)! dih`;
-                        mapFrame.src = buildOsmEmbedUrl(lat, lon);
-                        mapFrame.style.display = 'block';
-                        const info = await gatherAllInfo(lat, lon, geo.precise, ipAddress);
-                        currentInfo = info;
-                        renderInfo(info);
-                    },
-                    async (err) => {
-                        display.innerText = `I am a ${browser} user, but location access was denied or unavailable. dih`;
-                        const info = await gatherAllInfo(null, null, null, ipAddress);
-                        currentInfo = info;
-                        renderInfo(info);
-                        console.warn(err.message);
-                    },
-                    { enableHighAccuracy: true, timeout: 100000 }
+                            const lat = pos.coords.latitude;
+                            const lon = pos.coords.longitude;
+                            const geo = await fetchReverseGeocode(lat, lon);
+                            locationData = {
+                                lat,
+                                lon,
+                                precise: geo.precise
+                            };
+                            display.innerText =
+                                `I am a ${browser} user and I am in ${geo.relative}, which is in ${geo.precise} (${lat.toFixed(4)}°, ${lon.toFixed(4)}°)! dih`;
+                            mapFrame.src = buildOsmEmbedUrl(lat, lon);
+                            mapFrame.style.display = 'block';
+                            const info = await gatherAllInfo(lat, lon, geo.precise, ipAddress);
+                            currentInfo = info;
+                            renderInfo(info);
+                        },
+                        async (err) => {
+                            display.innerText = `I am a ${browser} user, but location access was denied or unavailable. dih`;
+                            const info = await gatherAllInfo(null, null, null, ipAddress);
+                            currentInfo = info;
+                            renderInfo(info);
+                            console.warn(err.message);
+                        }, {
+                            enableHighAccuracy: true,
+                            timeout: 100000
+                        }
                 );
             }
 
@@ -583,7 +752,9 @@
             })();
 
             downloadBtn.addEventListener('click', async function() {
-                const data = { ...currentInfo };
+                const data = {
+                    ...currentInfo
+                };
                 if (locationData.lat !== null) {
                     data['Latitude (raw)'] = locationData.lat;
                     data['Longitude (raw)'] = locationData.lon;
@@ -595,7 +766,9 @@
                 }
                 data['Map Image (base64)'] = mapImageBase64 || 'could not generate';
                 const json = JSON.stringify(data, null, 2);
-                const blob = new Blob([json], { type: 'application/json' });
+                const blob = new Blob([json], {
+                    type: 'application/json'
+                });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -608,4 +781,5 @@
         })();
     </script>
 </body>
+
 </html>
